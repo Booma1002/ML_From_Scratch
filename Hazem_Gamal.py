@@ -74,12 +74,15 @@ class Linear_Regression:
 
 class Logistic_Regression:
 
-    def __init__(self, n_iterations=100, convergence_threshold=0.0010,confidence_threshold=0.5, learning_rate=0.1):
+    def __init__(self, n_iterations=100, convergence_threshold=0.0,confidence_threshold=0.5, learning_rate=0.1,history_step =100):
         self.X = None
         self.y = None
         self.W = None
         self.b = None
         self.q = []
+        self.history_loss = []
+        self.history_acc = []
+        self.history_step = history_step
         self.n_iterations = n_iterations
         self.convergence_threshold = convergence_threshold
         self.confidence_threshold = confidence_threshold
@@ -113,11 +116,15 @@ class Logistic_Regression:
 
             # track convergence
             bce = self.BCE(self.y, self.pred_proba(self.X))
+            acc = self.accuracy(self.y, self.predict(self.X))
             self.q.append(bce)
+            if(cnt % self.history_step == 0):
+                self.history_loss.append(bce*100)
+                self.history_acc.append(acc*100)
             if len(self.q) > 2:
-                ratio = abs(self.q[-1] - self.q[-2]) / (abs(self.q[-1]) + 1e-8)
-                if ratio > self.convergence_threshold:
-                    print(f"Convergence after {cnt} iterations, ratio={ratio:.6f}")
+                ratio = abs(self.q[-1] - self.q[-2]) / (0.5 * (abs(self.q[-1]) + abs(self.q[-2])) + 1e-8)
+                if (ratio < self.convergence_threshold)&(cnt>10):
+                    print(f"Convergence after {cnt} iterations, ratio={ratio:.12f}")
                     break
                 self.q.pop(0)
         print(f"Iteration {cnt}: Final Log_Loss_score = {bce:.4f}")
