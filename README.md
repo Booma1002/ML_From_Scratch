@@ -15,7 +15,7 @@ Here is the checklist of algorithms I am building.
 
 ### Phase 1: The Core Mechanisms
 - [x] **Linear Regression**
-- [ ] Logistic Regression
+- [x] Logistic Regression
 - [ ] K-Nearest Neighbors (KNN)
 - [ ] K-Means Clustering
 
@@ -75,6 +75,12 @@ sns.lineplot(x=X_new.reshape(-1), y=predictions,color='red', linewidth=2)
 plt.grid(True)
 plt.show()
 ```
+```
+Output:
+Iteration 100: Final R2_score = 0.3327
+predictions of the data: [6.67565479 7.6420862 ]
+The R2 score is -6.3409
+```
 <img width="544" height="433" alt="image" src="https://github.com/user-attachments/assets/98e21d59-3cfb-43c4-87dd-3b9201dee33e" />
 
 
@@ -85,7 +91,72 @@ plt.show()
 * **How Gradient Descent Actually Works**: The main idea is to minimize a cost function by iteratively updating parameters, and stopping when it converges.
 
 ---
+## Completed: `Logistic_Regression`
+The second algorithm is a from-scratch implementation of Logistic Regression, trained with gradient descent and optimized using Binary Cross-Entropy Loss.
 
-## Next Up: Logistic Regression
+### Features Implemented:
+* **Sigmoid Activation**: Converts raw linear outputs to probabilities.
+* **Binary Cross-Entropy Loss (Log Loss)**: Used as the cost function.
+* **Prediction**: Classifies data points with a configurable confidence threshold.
+* **Evaluation**: Includes .accuracy() and .BCE() methods.
+* **API**: Follows Scikit-learn style with .fit() and .predict().
 
-The next challenge on the gauntlet is **Logistic Regression**. This will be my first from-scratch classifier and will require implementing the Sigmoid function and the Binary Cross-Entropy loss function.
+
+### Usage Example
+
+Here's how to use the `Logistic_Regression` class on a classification dataset:
+
+```python
+from Hazem_Gamal import Logistic_Regression
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+X, y = make_classification(n_samples=10000, n_features=4, n_classes=2, random_state=42)
+X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.3, random_state=42)
+
+# Train
+model = Logistic_Regression(n_iterations=10000, learning_rate=0.001, convergence_threshold=0.0,history_step=250)
+model.fit(X_train, y_train)
+
+# Predict
+y_pred = model.predict(X_test)
+acc =model.accuracy(y_test, y_pred)
+loss =model.BCE(y_test, y_pred)
+
+# Evaluate
+print("Accuracy:", acc)
+print("Loss:", loss)
+
+
+# Visualize loss curve:
+sns.set_style("darkgrid")
+sns.lineplot(model.history_acc, marker='o',label=f"Training Accuracy: {model.history_acc[-1]/100:.2f}")
+sns.lineplot(model.history_loss, marker='s',color='r',label=f'Loss: {model.history_loss[-1]/100:.2f}')
+plt.title("Training Progress")
+plt.axhline(y=100, color='black',label='1.00')
+plt.xlabel(f"Iteration*({model.history_step})")
+plt.ylabel("Metric")
+plt.legend()
+plt.show()
+```
+```
+Output:
+Iteration 10000: Final Log_Loss_score = 0.5383
+Accuracy: 0.8686666666666667
+Loss: 2.721655582446835
+```
+<img width="568" height="453" alt="image" src="https://github.com/user-attachments/assets/8d87bfda-7d69-48f5-b80d-473709bbc8d9" />
+
+### What I Learned
+
+
+* **Gradient Descent in practice**: Iterative updates converge to the optimal solution if learning rate and stopping conditions are chosen well.
+* **Why Logistic Regression is a linear classifier**: Even though it outputs probabilities, the decision boundary is linear.
+* **The importance of Binary Cross-Entropy loss**: Unlike MSE, it punishes confident wrong predictions heavily.
+---
+
+## Next Up: K-Nearest Neighbors (KNN)
+
+The next challenge on the gauntlet is **K-Nearest Neighbors (KNN)**.  It's a non-parametric, instance-based model. it doesn't learn a formula, instead, it memorizes the whole dataset.
