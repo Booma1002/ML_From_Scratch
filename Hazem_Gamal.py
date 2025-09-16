@@ -1,5 +1,4 @@
 import numpy as np
-
 class Linear_Regression:
     def __init__(self,n_iterations=100, convergence_threshold =0.0010,learning_rate=0.1, loss_function='mse'):
         self.X = None
@@ -70,8 +69,6 @@ class Linear_Regression:
 
     def __mse(self, y, y_pred):
         return np.mean((y - y_pred)**2)
-
-
 class Logistic_Regression:
 
     def __init__(self, n_iterations=100, convergence_threshold=0.0,confidence_threshold=0.5, learning_rate=0.1,history_step =100):
@@ -158,4 +155,48 @@ class Logistic_Regression:
 
     def accuracy(self, y_true, y_pred):
         return np.mean(y_true == y_pred)
+
+
+
+
+
+
+
+
+class K_Nearest_Neighbors:
+    def __init__(self,k=3):
+        self.k = k
+        self.X_train =None
+        self.y_train =None
+    def fit(self, X, y):
+        self.X_train = np.array(X)
+        self.y_train = np.array(y)
+
+    def predict(self, X_test):
+        X_test = np.array(X_test)
+        y_pred = [self._pred_single(x) for x in X_test]
+        return np.array(y_pred)
+
+    def _pred_single(self, x_test):
+        distances = [self.__euclidean_distance(x_test, x_train) for x_train in self.X_train]
+        k_i = np.argsort(distances)[:self.k]
+        voting = [self.y_train[i] for i in k_i]
+        vote = self.__majority(voting)
+        return vote
+
+    def __majority(self,votes):
+        vote, cnt = np.unique(votes, return_counts=True)
+        return vote[np.argmax(cnt)]
+
+    def __euclidean_distance(self,p,q):
+        return np.sqrt(np.sum((p-q)**2))
+
+    def accuracy(self, y_test, y_pred):
+        return np.mean(y_test == y_pred)
+
+
+
+
+
+
 
