@@ -16,7 +16,7 @@ Here is the checklist of algorithms I am building.
 ### Phase 1: The Core Mechanisms
 - [x] **Linear Regression**
 - [x] Logistic Regression
-- [ ] K-Nearest Neighbors (KNN)
+- [x] K-Nearest Neighbors (KNN)
 - [ ] K-Means Clustering
 
 ### Phase 2: Ensemble Methods
@@ -157,6 +157,83 @@ Loss: 2.721655582446835
 * **The importance of Binary Cross-Entropy loss**: Unlike MSE, it punishes confident wrong predictions heavily.
 ---
 
-## Next Up: K-Nearest Neighbors (KNN)
+## Completed: `K_Nearest_Neighbors`
+The third algorithm is a from-scratch implementation of K-Nearest Neighbors (KNN). This is a non-parametric, instance-based model that classifies new data points based on the majority class of its 'k' nearest neighbors.
 
-The next challenge on the gauntlet is **K-Nearest Neighbors (KNN)**.  It's a non-parametric, instance-based model. it doesn't learn a formula, instead, it memorizes the whole dataset.
+### Features Implemented:
+* **Instance-Based Learning:** The model memorizes the entire training dataset instead of learning weights.
+
+* **Euclidean Distance:** Uses the L2 norm to calculate the distance between data points in a multi-dimensional space.
+
+* **Efficient Majority Vote:** Implemented a fast majority class function using NumPy's bincount and argmax for performance, avoiding slower external libraries for the core logic.
+
+* **Modular Prediction:** Split the prediction logic into _predict_single for one sample and a public predict method that iterates over it, improving code clarity and maintainability.
+
+* **API:** Follows Scikit-learn style with .fit(), .predict(), and .accuracy() methods.
+  
+
+### Usage Example
+
+Here's how to use the `K_Nearest_Neighbors` class on a multi-class classification problem:
+
+```python
+from Hazem_Gamal import K_Nearest_Neighbors as KNN
+from sklearn.datasets import make_blobs
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+
+X, y = make_blobs(n_samples=1000, centers=4, n_features=2, cluster_std=1.3, random_state=37)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=37)
+
+k=51
+model = KNN(k)
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+accuracy = model.accuracy(y_test, y_pred)
+print(f"Model Accuracy: {accuracy*100:.2f}%")
+
+plt.figure(figsize=(6, 4))
+plt.style.use('ggplot')
+sns.scatterplot(
+    x=X_test[:, 0],
+    y=X_test[:, 1],
+    hue=y_test,
+    palette='plasma',
+    s=80,
+    edgecolor='k',
+    alpha=0.7,
+)
+
+plt.title(f'KNN decision boundary (k={k})\nAccuracy = {accuracy*100:.2f}%', fontsize=16)
+plt.xlabel('Feature 1', fontsize=12)
+plt.ylabel('Feature 2', fontsize=12)
+plt.legend(title='Actual Class')
+plt.grid(False)
+plt.show()
+```
+```
+Output:
+Model Accuracy: 97.00%
+```
+<img width="544" height="433" alt="image" src="https://github.com/user-attachments/assets/4cb9138e-f47e-4789-bf81-fdaa26b1e403" />
+
+### What I Learned
+
+* **The Geometry of Distance Metrics:** Understanding that the L2 (Euclidean) norm effectively finds neighbors within a circle was key. It sparked curiosity about how other norms (like L-infinity) would create different decision boundaries (like a square).
+
+* **NumPy-First Optimization:** My initial thought was to use scipy.stats.mode, but sticking to the "NumPy only" rule forced me to find a more fundamental and faster solution using np.unique(return_counts =True) and np.argmax. This was a great lesson in vectorized computation.
+
+* **The Power of Code Modularity:** Trying to write a single predict function was getting complicated. Splitting the logic into a helper function (_predict_single) that handles one point and a main function that loops over it made the code much cleaner and easier to debug.
+
+* **Lazy Learning Trade-offs:** KNN is simple to understand and implement because it doesn't have a "training" phase. However, this means prediction is computationally expensive, as it has to compare a new point to every single point in the training data.
+---
+
+
+
+## Next Up: K-Means Clustering
+
+The next challenge on the gauntlet is **K-Means Clustering**. Unlike the previous models, the goal here isn't to predict labels from a given truth. Instead, the task is to build a model that can discover hidden groups in the data all on its own.
+The core of the implementation will be tackling the two fundamental steps of the algorithm: the assignment step, where each data point is assigned to the nearest cluster centroid, and the update step, where the centroids are moved to the center of their assigned points.
