@@ -195,6 +195,80 @@ class K_Nearest_Neighbors:
         return np.mean(y_test == y_pred)
 
 
+class K_Means():
+    def __init__(self,k=4,max_iter=20,threshold=0.001):
+        self.k = k
+        self.max_iter = max_iter
+        self.centroids_ = None
+        self.idx = np.arange(k)
+        self.points={}
+        self.threshold=threshold
+        self.improve=1000
+        self.improvement =[]
+        self.prev=1e7
+
+    def fit(self,X):
+        self.X = np.array(X)
+        self.centroids_ = np.random.rand(self.k,X.shape[1])
+        i=0
+        while(i<self.max_iter):
+            self.__assign_points()
+            self.__update_centrs()
+            if((self.__converged())&(i>3)):
+                print(f"Converged at iteration {i}")
+                break
+            i+=1
+
+    def __assign_points(self):
+        points ={i:[] for i in self.idx}
+        cur=1
+        for p in self.X:
+            dist = np.array([self.__euclidean_distance(p,c) for c in self.centroids_])
+            idx = np.argmin(dist)
+            points[idx].append(p)
+            cur+=np.min(dist)
+        self.points = points
+        if(cur==0):
+            cur+=.00000001
+        self.improve = abs(self.prev - cur) / cur
+        self.improvement.append(self.improve)
+        self.prev = cur
+
+    def __update_centrs(self):
+        for i in self.points:
+            if len(self.points[i]) > 0:
+                self.centroids_[i] = np.mean(self.points[i], axis=0)
+
+    def predict(self,X_test):
+        X_test = np.array(X_test)
+        y_pred =[np.argmin([self.__euclidean_distance(p,c) for c in self.centroids_])for p in X_test]
+        return y_pred
+
+    def __euclidean_distance(self, p, q):
+        return np.sqrt(np.sum((p - q) ** 2))
+
+    def __converged(self):
+        return self.improve < self.threshold
+
+    def __nearest_cluster(self,cluster_idx):
+        dist = np.array([self.__euclidean_distance(p,self.centroids_[cluster_idx]) for p in self.centroids_])
+        return np.argsort(dist)[1]
+
+    def Score(self, X):
+        scores = []
+        pred = self.predict(X)
+        i=0
+        for point in X:
+            this = pred[i]
+            neighbor = self.__nearest_cluster(this)
+            a = np.mean([self.__euclidean_distance(point,pi) for pi in self.points[this]])
+            b=  np.mean([self.__euclidean_distance(point,ci)for ci in self.points[neighbor]])
+            scores.append((b-a)/(max(b,a)+.000000001))
+            i+=1
+        return np.mean(scores)
+
+
+
 
 
 
